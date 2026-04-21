@@ -10,6 +10,11 @@ class EvictionEngine:
         if exclusions is None:
             exclusions = []
             
+        try:
+            days_threshold = int(days_threshold)
+        except (ValueError, TypeError):
+            days_threshold = 30
+            
         now = time.time()
         cutoff_time = now - (days_threshold * 86400) # 86400 seconds in a day
         
