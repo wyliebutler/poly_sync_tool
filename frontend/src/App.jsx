@@ -665,7 +665,7 @@ function App() {
               {runLogs.length === 0 ? (
                 <p className="description">No sync logs recorded yet.</p>
               ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '1100px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border-color)', color: 'var(--text-muted)' }}>
                       <th style={{ padding: '10px', whiteSpace: 'nowrap' }}>Date</th>
@@ -674,7 +674,7 @@ function App() {
                       <th style={{ padding: '10px', whiteSpace: 'nowrap' }}>Files Scanned</th>
                       <th style={{ padding: '10px', whiteSpace: 'nowrap' }}>Successful</th>
                       <th style={{ padding: '10px', whiteSpace: 'nowrap' }}>Skipped/Failed</th>
-                      <th style={{ padding: '10px', whiteSpace: 'nowrap' }}>Errors</th>
+                      <th style={{ padding: '10px' }}>Errors</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -686,7 +686,7 @@ function App() {
                         <td style={{ padding: '10px', whiteSpace: 'nowrap' }}>{log.total_marked}</td>
                         <td style={{ padding: '10px', whiteSpace: 'nowrap', color: log.success_count > 0 ? '#10b981' : 'inherit', fontWeight: log.success_count > 0 ? 'bold' : 'normal' }}>{log.success_count}</td>
                         <td style={{ padding: '10px', whiteSpace: 'nowrap', color: log.fail_count > 0 ? 'var(--warning-color)' : 'inherit', fontWeight: log.fail_count > 0 ? 'bold' : 'normal' }}>{log.fail_count}</td>
-                        <td style={{ padding: '10px', color: 'var(--error-text)', fontSize: '0.8rem', maxWidth: '300px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={log.errors}>{log.errors || '-'}</td>
+                        <td style={{ padding: '10px', color: 'var(--error-text)', fontSize: '0.8rem', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{log.errors || '-'}</td>
                       </tr>
                     ))}
                   </tbody>
