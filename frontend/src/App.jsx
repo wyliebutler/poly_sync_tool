@@ -1,9 +1,88 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import FolderPicker from './FolderPicker'
 import CloudExplorer from './CloudExplorer'
 import logoImg from './assets/logo.png'
 import packageJson from '../package.json'
 import './App.css'
+
+const TreeNode = ({ node, selectedFileIds, toggleSelection }) => {
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (node.isFile) {
+    const isChecked = selectedFileIds.includes(node.id);
+    return (
+      <div style={{ paddingLeft: '24px', paddingBottom: '4px', display: 'flex', alignItems: 'center' }}>
+        <input 
+          type="checkbox" 
+          checked={isChecked} 
+          onChange={(e) => toggleSelection([node.id], e.target.checked)} 
+          style={{ marginRight: '8px', cursor: 'pointer' }}
+        />
+        <span style={{ fontSize: '0.9rem', wordBreak: 'break-all' }}>📄 {node.name}</span>
+      </div>
+    );
+  }
+
+  const allLeafIds = [];
+  const gatherLeaves = (n) => {
+    if (n.isFile) allLeafIds.push(n.id);
+    else {
+      n.files.forEach(gatherLeaves);
+      Object.values(n.children).forEach(gatherLeaves);
+    }
+  };
+  gatherLeaves(node);
+
+  if (allLeafIds.length === 0 && node.name !== 'Root') return null;
+
+  const allChecked = allLeafIds.length > 0 && allLeafIds.every(id => selectedFileIds.includes(id));
+  const someChecked = allLeafIds.length > 0 && allLeafIds.some(id => selectedFileIds.includes(id));
+
+  return (
+    <div style={{ paddingLeft: node.name === 'Root' ? '0px' : '16px', paddingBottom: '4px', marginTop: node.name === 'Root' ? '0' : '4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', cursor: 'pointer' }}>
+        <span onClick={() => setCollapsed(!collapsed)} style={{ marginRight: '6px', width: '16px', textAlign: 'center', color: 'var(--text-muted)' }}>
+          {collapsed ? '▶' : '▼'}
+        </span>
+        <input 
+          type="checkbox" 
+          checked={allChecked} 
+          ref={input => { if (input) input.indeterminate = !allChecked && someChecked; }}
+          onChange={(e) => toggleSelection(allLeafIds, e.target.checked)} 
+          style={{ marginRight: '8px', cursor: 'pointer' }}
+        />
+        <span onClick={() => setCollapsed(!collapsed)}>📁 {node.name}</span>
+      </div>
+      {!collapsed && (
+        <div style={{ marginTop: '2px', borderLeft: node.name === 'Root' ? 'none' : '1px dashed var(--border-color)', marginLeft: node.name === 'Root' ? '0' : '8px' }}>
+          {Object.values(node.children).map(child => (
+             <TreeNode key={child.name} node={child} selectedFileIds={selectedFileIds} toggleSelection={toggleSelection} />
+          ))}
+          {node.files.map(file => (
+             <TreeNode key={file.id} node={file} selectedFileIds={selectedFileIds} toggleSelection={toggleSelection} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const buildStructuralTree = (flatFiles) => {
+  const root = { name: 'Root', isFile: false, children: {}, files: [], path: '' };
+  flatFiles.forEach(file => {
+    const parts = file.path.split('/');
+    const fileName = parts.pop();
+    let current = root;
+    parts.forEach(part => {
+      if (!current.children[part]) {
+        current.children[part] = { name: part, isFile: false, children: {}, files: [], path: current.path ? current.path + '/' + part : part };
+      }
+      current = current.children[part];
+    });
+    current.files.push({ ...file, name: fileName, isFile: true });
+  });
+  return root;
+}
 
 function App() {
   const [authStatus, setAuthStatus] = useState(null)
@@ -27,6 +106,7 @@ function App() {
   const [selectiveRestoreModalOpen, setSelectiveRestoreModalOpen] = useState(false)
   const [selectiveRestoreMappingId, setSelectiveRestoreMappingId] = useState(null)
   const [remoteTree, setRemoteTree] = useState([])
+  const structuralTree = useMemo(() => buildStructuralTree(remoteTree), [remoteTree])
   const [selectedFileIds, setSelectedFileIds] = useState([])
   const [treeLoading, setTreeLoading] = useState(false)
   
@@ -719,21 +799,19 @@ function App() {
                  {remoteTree.length === 0 ? (
                     <p className="description">No files found.</p>
                  ) : (
-                    remoteTree.map(file => (
-                      <div key={file.id} style={{ padding: '8px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center' }}>
-                         <input 
-                           type="checkbox" 
-                           id={`chk-${file.id}`}
-                           checked={selectedFileIds.includes(file.id)}
-                           onChange={(e) => {
-                             if (e.target.checked) setSelectedFileIds([...selectedFileIds, file.id])
-                             else setSelectedFileIds(selectedFileIds.filter(id => id !== file.id))
-                           }}
-                           style={{ marginRight: '10px' }}
-                         />
-                         <label htmlFor={`chk-${file.id}`} style={{ flex: 1, wordBreak: 'break-all' }}>{file.path}</label>
-                      </div>
-                    ))
+                    <TreeNode 
+                       node={structuralTree} 
+                       selectedFileIds={selectedFileIds} 
+                       toggleSelection={(ids, forceCheck) => {
+                          if (forceCheck) {
+                             const newSet = new Set([...selectedFileIds, ...ids]);
+                             setSelectedFileIds(Array.from(newSet));
+                          } else {
+                             const newSet = new Set(selectedFileIds.filter(id => !ids.includes(id)));
+                             setSelectedFileIds(Array.from(newSet));
+                          }
+                       }}
+                    />
                  )}
                </div>
             )}
