@@ -323,15 +323,19 @@ def get_logs():
 
 @app.post("/sync/evict")
 def sync_evict():
-    mappings = mappings_manager.get_all()
-    local_dirs = [m['local_path'] for m in mappings if os.path.exists(m['local_path'])]
-    
-    settings = settings_manager.get_all()
-    days = settings.get("eviction_days_threshold", 30)
-    exclusions = settings.get("exclude_extensions", [])
-    
-    result = evictor.run_eviction(local_dirs, days_threshold=days, exclusions=exclusions)
-    return result
+    try:
+        mappings = mappings_manager.get_all()
+        local_dirs = [m['local_path'] for m in mappings if os.path.exists(m['local_path'])]
+        
+        settings = settings_manager.get_all()
+        days = settings.get("eviction_days_threshold", 30)
+        exclusions = settings.get("exclude_extensions", [])
+        
+        result = evictor.run_eviction(local_dirs, days_threshold=days, exclusions=exclusions)
+        return result
+    except Exception as e:
+        import traceback
+        return {"status": "error", "message": str(e), "traceback": traceback.format_exc()}
 
 async def auto_sync_task():
     while True:
