@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import FolderPicker from './FolderPicker'
 import CloudExplorer from './CloudExplorer'
 import logoImg from './assets/logo.png'
-import packageJson from '../../package.json'
+import packageJson from '../package.json'
 import './App.css'
 
 function App() {
