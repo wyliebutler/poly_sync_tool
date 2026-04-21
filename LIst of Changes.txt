@@ -1,0 +1,9 @@
+LIst of Changes
+1. I need to deal with files in use.  I'm suggseting a force copy with warnings if files are not copied.  Currently I'm getting a sync error: undefined on any sync request.
+I would like a message on failure what application might need to be close to allow the operation to proceed  without errors.
+2. Left align is not working for the drive windows
+3. There should be an edit for each drive mapping
+4. Drive explorer is still not working 
+5. The drive windows should hacve 2 distinct devisions.  One for the Persona drive of the user and one for the Corporagte Shares
+6. Doing an edit and trting to backout corrupted the mapping and it deleted it.  
+7. Selecting where to creae a folder is hard to follow.  It should be expressly noteed where the folder is being created.
