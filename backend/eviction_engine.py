@@ -28,20 +28,20 @@ class EvictionEngine:
                     if file.startswith('.') or any(file.endswith(ext) for ext in exclusions):
                         continue
                 
-                try:
-                    stat_info = os.stat(file_path)
-                    # Use atime (access time) or mtime (modified time) depending on OS support
-                    # Windows atime is sometimes unreliable unless enabled in registry,
-                    # but we'll use mtime/atime whichever is older as a fallback
-                    last_accessed = max(stat_info.st_atime, stat_info.st_mtime)
-                    
-                    if last_accessed < cutoff_time:
-                        file_size = stat_info.st_size
-                        os.remove(file_path)
-                        evicted_files.append(file)
-                        bytes_saved += file_size
-                except Exception as e:
-                    print(f"Failed to check/evict {file_path}: {e}")
+                    try:
+                        stat_info = os.stat(file_path)
+                        # Use atime (access time) or mtime (modified time) depending on OS support
+                        # Windows atime is sometimes unreliable unless enabled in registry,
+                        # but we'll use mtime/atime whichever is older as a fallback
+                        last_accessed = max(stat_info.st_atime, stat_info.st_mtime)
+                        
+                        if last_accessed < cutoff_time:
+                            file_size = stat_info.st_size
+                            os.remove(file_path)
+                            evicted_files.append(file)
+                            bytes_saved += file_size
+                    except Exception as e:
+                        print(f"Failed to check/evict {file_path}: {e}")
                     
         return {
             "status": "success",
