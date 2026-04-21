@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, screen } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 
@@ -11,12 +11,9 @@ let pythonProcess;
 const isDev = process.env.NODE_ENV === 'development';
 
 function createWindow() {
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.workAreaSize;
-
   mainWindow = new BrowserWindow({
-    width: Math.floor(width * 0.9),
-    height: Math.floor(height * 0.9),
+    width: 1100,
+    height: 800,
     show: true,
     icon: path.join(__dirname, 'icon.png'),
     webPreferences: {
